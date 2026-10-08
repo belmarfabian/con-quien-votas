@@ -155,7 +155,7 @@ details.metodo p{margin:10px 0 0;max-width:65ch}
       <span class="pild teal" style="align-self:flex-start">Educación cívica</span>
       <h1>¿Con quién votas?</h1>
       <p>Cinco proyectos de ley que votó la Cámara de Diputadas y Diputados. Tú votas cada uno. Al final te mostramos con qué partido coincides más, según cómo votaron de verdad sus diputados.</p>
-      <label class="opc"><input type="checkbox" id="optVer" checked> Ver cómo votó cada partido después de cada proyecto</label>
+      <label class="opc"><input type="checkbox" id="optVer"> Ver cómo votó cada partido después de cada proyecto</label>
       <p style="font-size:14px;opacity:.9">Al final puedes responder cinco más para afinar el resultado. Hay 20 proyectos en total, votados entre 2020 y 2026.</p>
       <button class="btnP blanco" id="btnEmpezar">Empezar a votar</button>
       <p style="font-size:12.5px;opacity:.9;margin:0">Guardamos tus votos y tu resultado de forma anónima, con fines de estudio. No pedimos tu nombre ni tu correo.</p>
@@ -236,7 +236,7 @@ const fecha = f => { const [y,m,d] = f.split('-'); return (+d)+' '+MESES[m-1]+' 
 function posicion(p){ if(!p) return null; const [s,n,a] = p, t = s+n+a; return t ? (s-n)/t : null; }
 
 /* registro anónimo: al ver el resultado se envían los votos y la afinidad a una planilla; nada identifica a la persona */
-const REGISTRO = 'https://script.google.com/macros/s/AKfycbxCDMg7mIOIcgmAREjtokvphKF0JGXVzx1fKcHwnw9sSCDsoDaGAqcHL91a1BWU_ChV/exec';
+const REGISTRO = 'https://script.google.com/macros/s/AKfycbzkUfaoNatKpZtpbaf7C6hz7f5Tc5ejeQps8HaoMhc_ql2LADkGoJ3_Y-q6fr_r6-c/exec';
 let partida = '';
 function nuevaPartida(){ try{ return crypto.randomUUID().replace(/-/g,'').slice(0,16); }catch(e){ return Date.now().toString(36)+Math.random().toString(36).slice(2,10); } }
 function guardar(r){
@@ -260,7 +260,7 @@ function empezar(){
   const todos = DATA.map((_,k)=>k), plenos = todos.filter(k => SIG.every(s => DATA[k].p[s]));
   orden = barajar(plenos).slice(0,RONDA); orden = orden.concat(barajar(todos.filter(k => orden.indexOf(k)<0)));
   i = 0; fin = RONDA; votos = {}; partida = nuevaPartida();
-  try{ localStorage.setItem('cqv_ver', mostrar?'1':'0'); }catch(e){}
+  try{ localStorage.setItem('cqv_ver2', mostrar?'1':'0'); }catch(e){}
   tarjeta(); ver('vJuego');
 }
 function tarjeta(){
@@ -355,7 +355,7 @@ $('btnCopiar').onclick = () => {
   const ok = () => $('copiado').textContent = 'Copiado.';
   try{ navigator.clipboard.writeText(txt).then(ok, () => $('copiado').textContent = txt); }catch(e){ $('copiado').textContent = txt; }
 };
-try{ const g = localStorage.getItem('cqv_ver'); if(g!==null) $('optVer').checked = g==='1'; }catch(e){}
+try{ const g = localStorage.getItem('cqv_ver2'); if(g!==null) $('optVer').checked = g==='1'; }catch(e){}
 </script>
 </body>
 </html>
