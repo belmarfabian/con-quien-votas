@@ -10,6 +10,10 @@ Juego de educación cívica del Centro de Estudios Públicos (CEP). Votas cinco 
 - La posición de un partido es el saldo de sus diputados en la votación de la Sala: votos a favor menos votos en contra, dividido por todos los que votaron.
 - Incluye los 15 partidos constituidos ante el Servel.
 
+## Datos
+
+Al ver el resultado, el juego envía de forma anónima los votos y la afinidad con cada partido a una planilla privada. Lo recibe el script de `registro/Codigo.gs`, desplegado con Google Apps Script. No se guarda nombre, correo ni IP. Para probar sin mezclar datos reales, agrega `?prueba=1` al final de la dirección.
+
 ## Fuentes
 
 - Votaciones y militancias: datos abiertos de la Cámara de Diputadas y Diputados (opendata.camara.cl).

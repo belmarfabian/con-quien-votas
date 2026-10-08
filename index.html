@@ -158,6 +158,7 @@ details.metodo p{margin:10px 0 0;max-width:65ch}
       <label class="opc"><input type="checkbox" id="optVer" checked> Ver cómo votó cada partido después de cada proyecto</label>
       <p style="font-size:14px;opacity:.9">Al final puedes responder cinco más para afinar el resultado. Hay 20 proyectos en total, votados entre 2020 y 2026.</p>
       <button class="btnP blanco" id="btnEmpezar">Empezar a votar</button>
+      <p style="font-size:12.5px;opacity:.9;margin:0">Guardamos tus votos y tu resultado de forma anónima, con fines de estudio. No pedimos tu nombre ni tu correo.</p>
     </div>
     <div class="secTit"><span class="t">c</span><span class="s"></span><h2>Cómo se juega</h2></div>
     <div class="pasos">
@@ -234,6 +235,20 @@ const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov'
 const fecha = f => { const [y,m,d] = f.split('-'); return (+d)+' '+MESES[m-1]+' '+y; };
 function posicion(p){ if(!p) return null; const [s,n,a] = p, t = s+n+a; return t ? (s-n)/t : null; }
 
+/* registro anónimo: al ver el resultado se envían los votos y la afinidad a una planilla; nada identifica a la persona */
+const REGISTRO = 'https://script.google.com/macros/s/AKfycbxCDMg7mIOIcgmAREjtokvphKF0JGXVzx1fKcHwnw9sSCDsoDaGAqcHL91a1BWU_ChV/exec';
+let partida = '';
+function nuevaPartida(){ try{ return crypto.randomUUID().replace(/-/g,'').slice(0,16); }catch(e){ return Date.now().toString(36)+Math.random().toString(36).slice(2,10); } }
+function guardar(r){
+  if(!REGISTRO) return;
+  const ok = r.filter(x => x.n>=MINIMO && x.af!==null).sort((a,b)=>b.af-a.af), af = {};
+  ok.forEach(x => { af[x.s] = x.af; });
+  const datos = { version:'cqv1', partida, ronda: Math.ceil(fin/RONDA), ver_tablero: mostrar?1:0,
+    votados: Object.values(votos).filter(v=>v).length, top: ok.length ? ok.filter(x=>x.af===ok[0].af).map(x=>x.s).join('+') : '',
+    orden: orden.slice(0,fin).map(k=>DATA[k].id), votos, afinidad: af, prueba: /[?&]prueba=1\b/.test(location.search) ? 1 : 0 };
+  try{ fetch(REGISTRO, {method:'POST', mode:'no-cors', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(datos)}).catch(()=>{}); }catch(e){}
+}
+
 const RONDA = 5, MINIMO = 3;
 let orden = [], i = 0, fin = RONDA, votos = {}, mostrar = true;
 function barajar(a){ for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
@@ -244,7 +259,7 @@ function empezar(){
   mostrar = $('optVer').checked; /* la primera ronda usa los proyectos en que votaron los 15 partidos; las siguientes, el resto */
   const todos = DATA.map((_,k)=>k), plenos = todos.filter(k => SIG.every(s => DATA[k].p[s]));
   orden = barajar(plenos).slice(0,RONDA); orden = orden.concat(barajar(todos.filter(k => orden.indexOf(k)<0)));
-  i = 0; fin = RONDA; votos = {};
+  i = 0; fin = RONDA; votos = {}; partida = nuevaPartida();
   try{ localStorage.setItem('cqv_ver', mostrar?'1':'0'); }catch(e){}
   tarjeta(); ver('vJuego');
 }
@@ -293,6 +308,7 @@ function resultados(){
   progreso(); $('prog').textContent = 'Resultado';
   const r = calcular(), ok = r.filter(x => x.n>=MINIMO).sort((a,b)=>b.af-a.af || b.n-a.n), pocos = r.filter(x => x.n<MINIMO);
   const votados = Object.values(votos).filter(v=>v).length;
+  guardar(r);
   if(!ok.length){
     $('podio').innerHTML = '<span class="eti">Sin resultado</span><div class="gan">Votaste muy pocos proyectos</div><p>Necesitamos al menos tres votos a favor o en contra para comparar. Pasaste '+(fin-votados)+' de '+fin+'.</p>';
   } else {
